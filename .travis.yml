@@ -11,10 +11,17 @@ script:
   # Build the binary
   - GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '-s -w' -o drone-flynn-docker-push
   # Build the drone plugin as docker container
-  - docker build -t $TRAVIS_REPO_SLUG .
+  - docker build -t $TRAVIS_REPO_SLUG:$TRAVIS_COMMIT .
 
+# Tag and push created image into docker hub
 after_success:
   - if [ "$TRAVIS_BRANCH" == "master" ]; then
     docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+    export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
+    docker build -f Dockerfile -t $REPO:$COMMIT .
+    if [ "$TRAVIS_TAG" != "" ]; then
+      docker tag $TRAVIS_REPO_SLUG:$TRAVIS_COMMIT $TRAVIS_REPO_SLUG:$TRAVIS_TAG
+    fi
+    docker tag $TRAVIS_REPO_SLUG:$TRAVIS_COMMIT $TRAVIS_REPO_SLUG:travis-$TRAVIS_BUILD_NUMBER
     docker push $TRAVIS_REPO_SLUG;
     fi
