@@ -25,4 +25,4 @@ _testmain.go
 .env
 
 coverage.out
-drone-docker
+drone-flynn-docker-push

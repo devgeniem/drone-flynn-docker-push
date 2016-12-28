@@ -89,7 +89,7 @@ func (p Plugin) Exec() error {
 	// poll the docker daemon until it is started. This ensures the daemon is
 	// ready to accept connections before we proceed.
 	for i := 0; i < 15; i++ {
-		cmd := commandInfo()
+		cmd := commandDockerInfo()
 		err := cmd.Run()
 		if err == nil {
 			break
@@ -110,18 +110,11 @@ func (p Plugin) Exec() error {
 	}
 
 	var cmds []*exec.Cmd
-	cmds = append(cmds, commandVersion())      // docker version
-	cmds = append(cmds, commandInfo())         // docker & flynn info
+    cmds = append(cmds, commandFlynnVersion())       // flynn version
+	cmds = append(cmds, commandDockerVersion())      // docker version
+	cmds = append(cmds, commandDockerInfo())         // docker info
 	cmds = append(cmds, commandBuild(p.Build)) // docker build
     cmds = append(cmds, commandPushFlynn(p.Flynn, p.Build)) // push image to Flynn
-
-	for _, tag := range p.Build.Tags {
-		cmds = append(cmds, commandTag(p.Build, tag)) // docker tag
-
-		if p.Dryrun == false {
-			cmds = append(cmds, commandPush(p.Build, tag)) // docker push
-		}
-	}
 
 	// execute all commands in batch mode.
 	for _, cmd := range cmds {
@@ -162,14 +155,19 @@ func commandPushFlynn(flynn Flynn, build Build) *exec.Cmd {
     )
 }
 
-// helper function to create the docker info command.
-func commandVersion() *exec.Cmd {
+// helper function to check the flynn client version.
+func commandFlynnVersion() *exec.Cmd {
+    return exec.Command(flynnExe, "version")
+}
+
+// helper function to check the docker version.
+func commandDockerVersion() *exec.Cmd {
 	return exec.Command(dockerExe, "version")
 }
 
 // helper function to create the docker info command.
-func commandInfo() *exec.Cmd {
-	return exec.Command(dockerExe, "info")
+func commandDockerInfo() *exec.Cmd {
+    return exec.Command(dockerExe, "info")
 }
 
 // helper function to create the docker build command.

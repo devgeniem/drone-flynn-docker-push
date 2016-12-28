@@ -8,6 +8,6 @@ RUN apk add --no-cache curl && \
     chmod +x $FLYNN_L && \
     apk del curl
 
-ADD drone-flynn-docker /bin/
+ADD drone-flynn-docker-push /bin/
 
-ENTRYPOINT ["/usr/local/bin/dockerd-entrypoint.sh", "/bin/drone-flynn-docker"]
+ENTRYPOINT ["/usr/local/bin/dockerd-entrypoint.sh", "/bin/drone-flynn-docker-push"]

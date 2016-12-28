@@ -114,25 +114,24 @@ func main() {
 			EnvVar: "PLUGIN_REPO",
 		},
 		cli.StringFlag{
-			Name:   "docker.registry",
-			Usage:  "docker registry",
-			Value:  defaultRegistry,
-			EnvVar: "DOCKER_REGISTRY,PLUGIN_REGISTRY",
+			Name:   "flynn.key",
+			Usage:  "Flynn Key",
+			EnvVar: "FLYNN_KEY,PLUGIN_KEY",
 		},
 		cli.StringFlag{
-			Name:   "docker.username",
-			Usage:  "docker username",
-			EnvVar: "DOCKER_USERNAME,PLUGIN_USERNAME",
+			Name:   "flynn.tlspin",
+			Usage:  "Flynn TLS pin",
+			EnvVar: "FLYNN_TLSPIN,PLUGIN_TLSPIN",
 		},
 		cli.StringFlag{
-			Name:   "docker.password",
-			Usage:  "docker password",
-			EnvVar: "DOCKER_PASSWORD,PLUGIN_PASSWORD",
+			Name:   "flynn.domain",
+			Usage:  "Flynn domain",
+			EnvVar: "FLYNN_DOMAIN,PLUGIN_DOMAIN",
 		},
 		cli.StringFlag{
-			Name:   "docker.email",
-			Usage:  "docker email",
-			EnvVar: "DOCKER_EMAIL,PLUGIN_EMAIL",
+			Name:   "flynn.app",
+			Usage:  "Flynn application",
+			EnvVar: "FLYNN_APP,PLUGIN_APP",
 		},
 	}
 
