@@ -17,11 +17,10 @@ script:
 after_success:
   - if [ "$TRAVIS_BRANCH" == "master" ]; then
     docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-    export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
-    docker build -f Dockerfile -t $REPO:$COMMIT .
+    docker build -f Dockerfile -t $REPO:$COMMIT .;
     if [ "$TRAVIS_TAG" != "" ]; then
-      docker tag $TRAVIS_REPO_SLUG:$TRAVIS_COMMIT $TRAVIS_REPO_SLUG:$TRAVIS_TAG
+      docker tag $TRAVIS_REPO_SLUG:$TRAVIS_COMMIT $TRAVIS_REPO_SLUG:$TRAVIS_TAG;
     fi
-    docker tag $TRAVIS_REPO_SLUG:$TRAVIS_COMMIT $TRAVIS_REPO_SLUG:travis-$TRAVIS_BUILD_NUMBER
+    docker tag $TRAVIS_REPO_SLUG:$TRAVIS_COMMIT $TRAVIS_REPO_SLUG:travis-$TRAVIS_BUILD_NUMBER;
     docker push $TRAVIS_REPO_SLUG;
     fi
