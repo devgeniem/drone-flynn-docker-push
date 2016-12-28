@@ -22,5 +22,5 @@ after_success:
       docker tag $TRAVIS_REPO_SLUG:$TRAVIS_COMMIT $TRAVIS_REPO_SLUG:$TRAVIS_TAG;
     fi
     docker tag $TRAVIS_REPO_SLUG:$TRAVIS_COMMIT $TRAVIS_REPO_SLUG:travis-$TRAVIS_BUILD_NUMBER;
-    docker push $TRAVIS_REPO_SLUG;
+    docker push $TRAVIS_REPO_SLUG:$TRAVIS_COMMIT;
     fi
