@@ -1,0 +1,20 @@
+sudo: required
+
+language: go
+
+services:
+  - docker
+
+script:
+  - go get
+  - go test
+  # Build the binary
+  - GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '-s -w' -o drone-flynn-docker-push
+  # Build the drone plugin as docker container
+  - docker build -t $TRAVIS_REPO_SLUG .
+
+after_success:
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then
+    docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+    docker push $TRAVIS_REPO_SLUG;
+    fi
