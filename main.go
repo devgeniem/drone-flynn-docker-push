@@ -144,11 +144,11 @@ func main() {
 func run(c *cli.Context) error {
 	plugin := Plugin{
 		Dryrun: c.Bool("dry-run"),
-		Login: Login{
-			Registry: c.String("docker.registry"),
-			Username: c.String("docker.username"),
-			Password: c.String("docker.password"),
-			Email:    c.String("docker.email"),
+		Flynn: Flynn{
+			Domain:  c.String("flynn.domain"),
+			Key:     c.String("flynn.key"),
+			TLSPin:  c.String("flynn.tlspin"),
+			App:     c.String("flynn.app"),
 		},
 		Build: Build{
 			Name:       c.String("commit.sha"),

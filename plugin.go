@@ -30,12 +30,12 @@ type (
 		IPv6          bool     // Docker daemon IPv6 networking
 	}
 
-	// Login defines Docker login parameters.
-	Login struct {
-		Registry string // Docker registry address
-		Username string // Docker registry username
-		Password string // Docker registry password
-		Email    string // Docker registry email
+	// Login defines Flynn login parameters.
+	Flynn struct {
+		Domain   string // Flynn domain
+		TLSPin   string // Flynn TLS PIN
+		Key      string // Flynn Key
+        App      string // Flynn application name
 	}
 
 	// Build defines Docker build parameters.
@@ -50,7 +50,7 @@ type (
 
 	// Plugin defines the Docker plugin parameters.
 	Plugin struct {
-		Login  Login  // Docker login configuration
+		Flynn  Flynn  // Flynn login configuration
 		Build  Build  // Docker build configuration
 		Daemon Daemon // Docker daemon configuration
 		Dryrun bool   // Docker push is skipped
@@ -98,23 +98,22 @@ func (p Plugin) Exec() error {
 	}
 
 	// login to the Docker registry
-	if p.Login.Password != "" {
-		cmd := commandLogin(p.Login)
+	if p.Flynn.Key != ""  && p.Flynn.TLSPin != "" {
+		cmd := commandLoginFlynn(p.Flynn)
 		err := cmd.Run()
 		if err != nil {
 			return fmt.Errorf("Error authenticating: %s", err)
 		}
 	} else {
-		fmt.Println("Registry credentials not provided. Guest mode enabled.")
+		fmt.Println("Error: Flynn credentials or TLS pin was not provided...")
+        return nil
 	}
-
-	// add proxy build args
-	addProxyBuildArgs(&p.Build)
 
 	var cmds []*exec.Cmd
 	cmds = append(cmds, commandVersion())      // docker version
-	cmds = append(cmds, commandInfo())         // docker info
+	cmds = append(cmds, commandInfo())         // docker & flynn info
 	cmds = append(cmds, commandBuild(p.Build)) // docker build
+    cmds = append(cmds, commandPushFlynn(p.Flynn, p.Build)) // push image to Flynn
 
 	for _, tag := range p.Build.Tags {
 		cmds = append(cmds, commandTag(p.Build, tag)) // docker tag
@@ -140,28 +139,27 @@ func (p Plugin) Exec() error {
 }
 
 const dockerExe = "/usr/local/bin/docker"
+const flynnExe = "/usr/local/bin/flynn"
 
-// helper function to create the docker login command.
-func commandLogin(login Login) *exec.Cmd {
-	if login.Email != "" {
-		return commandLoginEmail(login)
-	}
-	return exec.Command(
-		dockerExe, "login",
-		"-u", login.Username,
-		"-p", login.Password,
-		login.Registry,
-	)
+// helper function to login into flynn useing the flynn client binary.
+func commandLoginFlynn(flynn Flynn) *exec.Cmd {
+    return exec.Command(
+        flynnExe, "cluster", "add",
+        "--no-git", "--docker",
+        "-p", flynn.TLSPin,
+        "default",
+        flynn.Domain,
+        flynn.Key,
+    )
 }
 
-func commandLoginEmail(login Login) *exec.Cmd {
-	return exec.Command(
-		dockerExe, "login",
-		"-u", login.Username,
-		"-p", login.Password,
-		"-e", login.Email,
-		login.Registry,
-	)
+// helper function to login into flynn useing the flynn client binary.
+func commandPushFlynn(flynn Flynn, build Build) *exec.Cmd {
+    return exec.Command(
+        flynnExe,
+        "-a", flynn.App,
+        "docker", "push", build.Name,
+    )
 }
 
 // helper function to create the docker info command.
@@ -189,49 +187,6 @@ func commandBuild(build Build) *exec.Cmd {
 	}
 	cmd.Args = append(cmd.Args, build.Context)
 	return cmd
-}
-
-// helper function to add proxy values from the environment
-func addProxyBuildArgs(build *Build) {
-	addProxyValue(build, "http_proxy")
-	addProxyValue(build, "https_proxy")
-	addProxyValue(build, "no_proxy")
-}
-
-// helper function to add the upper and lower case version of a proxy value.
-func addProxyValue(build *Build, key string) {
-	value := getProxyValue(key)
-
-	if len(value) > 0 && !hasProxyBuildArg(build, key) {
-		build.Args = append(build.Args, fmt.Sprintf("%s=%s", key, value))
-		build.Args = append(build.Args, fmt.Sprintf("%s=%s", strings.ToUpper(key), value))
-	}
-}
-
-// helper function to get a proxy value from the environment.
-//
-// assumes that the upper and lower case versions of are the same.
-func getProxyValue(key string) string {
-	value := os.Getenv(key)
-
-	if len(value) > 0 {
-		return value
-	}
-
-	return os.Getenv(strings.ToUpper(key))
-}
-
-// helper function that looks to see if a proxy value was set in the build args.
-func hasProxyBuildArg(build *Build, key string) bool {
-	keyUpper := strings.ToUpper(key)
-
-	for _, s := range build.Args {
-		if strings.HasPrefix(s, key) || strings.HasPrefix(s, keyUpper) {
-			return true
-		}
-	}
-
-	return false
 }
 
 // helper function to create the docker tag command.
