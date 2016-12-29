@@ -14,9 +14,16 @@ script:
   - docker build -t $TRAVIS_REPO_SLUG .
 
 # Tag and push created image into docker hub
+# In order to use secrets with drone we need to add arbitrary tags like testing, production, staging
+# These are added so we can have different secrets for
+# - devgeniem/drone-flynn-docker-push:production
+# - devgeniem/drone-flynn-docker-push:staging
 after_success:
   - if [ "$TRAVIS_BRANCH" == "master" ]; then
     docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
     docker tag $TRAVIS_REPO_SLUG $TRAVIS_REPO_SLUG:travis-$TRAVIS_BUILD_NUMBER;
+    docker tag $TRAVIS_REPO_SLUG $TRAVIS_REPO_SLUG:testing;
+    docker tag $TRAVIS_REPO_SLUG $TRAVIS_REPO_SLUG:production;
+    docker tag $TRAVIS_REPO_SLUG $TRAVIS_REPO_SLUG:staging;
     docker push $TRAVIS_REPO_SLUG;
     fi
