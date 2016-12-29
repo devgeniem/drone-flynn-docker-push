@@ -99,10 +99,11 @@ func (p Plugin) Exec() error {
 
 	// login to the Docker registry
 	if p.Flynn.Key != ""  && p.Flynn.TLSPin != "" {
+        fmt.Println("Info: Deploying to %s Flynn...",p.Flynn.Domain)
 		cmd := commandLoginFlynn(p.Flynn)
 		err := cmd.Run()
 		if err != nil {
-			return fmt.Errorf("Error authenticating: %s", err)
+			return fmt.Errorf("Error authenticating to Flynn: %s", err)
 		}
 	} else {
 		fmt.Println("Error: Flynn credentials or TLS pin was not provided...")

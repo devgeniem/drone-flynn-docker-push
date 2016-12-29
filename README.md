@@ -39,10 +39,10 @@ Execute this plugin from the working directory:
 docker run --rm \
   -e PLUGIN_TAG=latest \
   -e PLUGIN_REPO=devgeniem/wp-project \
-  -e FLYNN_TLSPIN='XXXXXXXXXXXXXXXXXXXXXXX'
-  -e FLYNN_KEY='YYYYYYYYYYYYYYYYYYYYYYYY'
-  -e FLYNN_DOMAIN='flynn.example.com'
-  -e FLYNN_APP='my-application'
+  -e FLYNN_TLSPIN='XXXXXXXXXXXXXXXXXXXXXXX' \
+  -e FLYNN_KEY='YYYYYYYYYYYYYYYYYYYYYYYY' \
+  -e FLYNN_DOMAIN='flynn.example.com' \
+  -e FLYNN_APP='my-application' \
   -e DRONE_COMMIT_SHA=d8dbe4d94f15fe89232e0402c6e8a0ddf21af3ab \
   -v $(pwd):$(pwd) \
   -w $(pwd) \
